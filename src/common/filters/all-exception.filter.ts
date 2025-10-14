@@ -10,6 +10,7 @@ import { ResponseData } from '../globalClass';
 
 interface ErrorObject {
   message?: string | string[];
+  errors?: unknown;
   [key: string]: unknown;
 }
 
@@ -20,21 +21,26 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal Server Error';
+    let message: string | string[] = 'Internal Server Error';
 
     // ✅ Trường hợp NestJS ném HttpException
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      const errorResponse: unknown = exception.getResponse();
+      const errorResponse = exception.getResponse();
 
       if (typeof errorResponse === 'string') {
         message = errorResponse;
       } else if (typeof errorResponse === 'object' && errorResponse !== null) {
-        const obj = errorResponse as ErrorObject;
+        // ✅ Ép kiểu an toàn để tránh lỗi "unsafe assignment"
+        const obj: ErrorObject = { ...errorResponse };
+
+        // ✅ Xử lý message
         if (typeof obj.message === 'string') {
           message = obj.message;
         } else if (Array.isArray(obj.message)) {
-          message = obj.message.map(String).join(', ');
+          console.log('obj.message', obj.message);
+
+          message = obj.message;
         }
       }
     }
@@ -42,6 +48,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // ✅ Trường hợp lỗi JS runtime
     else if (exception instanceof Error) {
       message = exception.message;
+    }
+
+    // ✅ Trường hợp khác (không phải Error)
+    else {
+      message = String(exception);
     }
 
     // ✅ Trả về response JSON chuẩn

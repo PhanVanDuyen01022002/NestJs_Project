@@ -2,10 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
+// import { LoggerMiddleware } from './middleware/logger/logger.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // const loggerMiddleware = new LoggerMiddleware();
+
+  // app.use(loggerMiddleware.use.bind(loggerMiddleware));
 
   // ✅ Bật global validation
   app.useGlobalPipes(
@@ -13,6 +18,15 @@ async function bootstrap() {
       whitelist: true, // chỉ nhận field có trong DTO, bỏ field thừa
       forbidNonWhitelisted: true, // báo lỗi nếu có field không khai báo
       transform: true, // tự động chuyển kiểu dữ liệu
+      exceptionFactory: (validationErrors: ValidationError[] = []) => {
+        return new BadRequestException(
+          validationErrors.map((error) => ({
+            [error.property]: error.constraints
+              ? Object.values(error.constraints).join(', ')
+              : 'Invalid value',
+          })),
+        );
+      },
     }),
   );
 

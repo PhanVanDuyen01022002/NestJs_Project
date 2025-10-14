@@ -1,13 +1,13 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
-export class User {
+@Entity('products')
+export default class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -15,16 +15,16 @@ export class User {
   name: string;
 
   @Column()
-  email: string;
+  price: number;
 
-  @Column()
-  password: string;
+  @Column({ nullable: true })
+  description?: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  created_ad: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',

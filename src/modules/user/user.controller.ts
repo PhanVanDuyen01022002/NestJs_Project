@@ -10,7 +10,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './user.entity';
+import { User } from '../../entities/User';
 import { ResponseData } from 'src/common/globalClass';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -36,12 +36,20 @@ export class UserController {
   }
 
   @Delete(':id')
-  removeUser(@Param('id') id: number): string {
-    return 'Xoa user thanh cong' + id;
+  async removeUser(@Param('id') id: string) {
+    try {
+      const user = await this.userService.remove(id);
+      return user;
+    } catch (error) {
+      if (error instanceof Error)
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    }
   }
 
   @Post()
-  async createUser(@Body() body: User): Promise<ResponseData<User | null>> {
+  async createUser(
+    @Body() body: CreateUserDto,
+  ): Promise<ResponseData<User | null>> {
     if (!body.name || !body.email || !body.password) {
       throw new HttpException(
         new ResponseData<null>(null, HttpStatus.BAD_REQUEST, 'Invalid data'),

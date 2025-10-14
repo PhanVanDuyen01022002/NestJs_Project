@@ -1,12 +1,12 @@
 export class ResponseData<D> {
   data: D | D[];
   statusCode: number;
-  message: string;
+  message: string | string[];
 
   constructor(
     data: D | D[],
     statusCode = 200,
-    message = 'Server Response Success',
+    message: string | string[] = 'Server Response Success',
   ) {
     this.data = data;
     this.statusCode = statusCode;
