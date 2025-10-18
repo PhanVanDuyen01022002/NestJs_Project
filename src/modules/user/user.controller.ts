@@ -3,16 +3,14 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
+  NotFoundException,
   Param,
-  Post,
   Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '../../entities/User';
+import { User } from '../../entities/user.entity';
 import { ResponseData } from 'src/common/globalClass';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -29,9 +27,18 @@ export class UserController {
     try {
       const user = await this.userService.findById(id);
       return user;
-    } catch (error) {
-      if (error instanceof Error)
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    } catch {
+      throw new NotFoundException('User Not Found!');
+    }
+  }
+
+  @Get(':id/posts')
+  async getPostsUser(@Param('id') id: string) {
+    try {
+      const user = await this.userService.findPostsByUserId(id);
+      return user;
+    } catch {
+      throw new NotFoundException('User Not Found!');
     }
   }
 
@@ -41,35 +48,18 @@ export class UserController {
       const user = await this.userService.remove(id);
       return user;
     } catch (error) {
-      if (error instanceof Error)
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      if (error instanceof Error) throw new NotFoundException(error.message);
     }
-  }
-
-  @Post()
-  async createUser(
-    @Body() body: CreateUserDto,
-  ): Promise<ResponseData<User | null>> {
-    if (!body.name || !body.email || !body.password) {
-      throw new HttpException(
-        new ResponseData<null>(null, HttpStatus.BAD_REQUEST, 'Invalid data'),
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const user = await this.userService.create(body);
-    return new ResponseData<User>(user);
   }
 
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() body: CreateUserDto) {
+  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     try {
-      const user = await this.userService.update(id, body);
-      console.log({ user });
+      const user = await this.userService.updateUser(id, body);
 
       return user;
     } catch (error) {
-      if (error instanceof Error)
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      if (error instanceof Error) throw new NotFoundException(error.message);
     }
   }
 }

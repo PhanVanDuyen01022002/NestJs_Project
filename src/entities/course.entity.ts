@@ -4,24 +4,35 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { User } from './user.entity';
 
-@Entity('users')
-export class User {
+@Entity('courses')
+export class Course {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   name: string;
 
-  @Column({ unique: true })
-  email: string;
-
   @Column()
-  password: string;
+  price: number;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @ManyToMany(() => User, (user) => user.courses, { onDelete: 'CASCADE' })
+  @JoinTable({
+    name: 'courses_users',
+    joinColumn: {
+      name: 'course_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+  })
+  users: User[];
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

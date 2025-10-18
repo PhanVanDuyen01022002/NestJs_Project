@@ -4,13 +4,12 @@ import { TransformResponseInterceptor } from './common/interceptors/transform-re
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
+import cookieParser from 'cookie-parser';
 // import { LoggerMiddleware } from './middleware/logger/logger.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // const loggerMiddleware = new LoggerMiddleware();
-
-  // app.use(loggerMiddleware.use.bind(loggerMiddleware));
+  app.use(cookieParser());
 
   // ✅ Bật global validation
   app.useGlobalPipes(

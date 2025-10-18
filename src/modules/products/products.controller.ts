@@ -8,13 +8,15 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductCreateDto } from './dto/product-create';
 import { ProductUpdateDto } from './dto/product-update';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('products')
-// @UsePipes(new ValidationPipe({ transform: true })) // Cách này cũng được, nhưng sẽ áp dụng riêng cho controller này(không phải toàn cục)
+@UseGuards(JwtAuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
